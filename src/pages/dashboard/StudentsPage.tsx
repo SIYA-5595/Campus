@@ -18,9 +18,17 @@ interface Student {
   full_name: string;
   email: string;
   department: string | null;
-  year: string | null;
+  joining_year: number | null;
+  end_year: number | null;
+  year_of_study: string | null;
   is_approved: boolean;
   avatar_url: string | null;
+  age: number | null;
+  dob: string | null;
+  contact_number: string | null;
+  whatsapp_number: string | null;
+  father_name: string | null;
+  gender: string | null;
 }
 
 export default function StudentsPage() {
@@ -28,9 +36,13 @@ export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [editStudent, setEditStudent] = useState<Student | null>(null);
+  const [viewStudent, setViewStudent] = useState<Student | null>(null);
+  
   const [editName, setEditName] = useState("");
   const [editDept, setEditDept] = useState("");
-  const [editYear, setEditYear] = useState("");
+  const [editJoiningYear, setEditJoiningYear] = useState("");
+  const [editAge, setEditAge] = useState("");
+  const [editContact, setEditContact] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -39,7 +51,6 @@ export default function StudentsPage() {
 
   const fetchStudents = async () => {
     setLoading(true);
-    // Get all student user_ids from user_roles
     const { data: roleData } = await supabase
       .from("user_roles")
       .select("user_id")
@@ -53,7 +64,7 @@ export default function StudentsPage() {
         .select("*")
         .in("user_id", studentIds)
         .order("full_name");
-      setStudents((profileData || []) as Student[]);
+      setStudents((profileData || []) as unknown as Student[]);
     } else {
       setStudents([]);
     }
@@ -74,9 +85,11 @@ export default function StudentsPage() {
 
   const handleEdit = (s: Student) => {
     setEditStudent(s);
-    setEditName(s.full_name);
+    setEditName(s.full_name || "");
     setEditDept(s.department || "");
-    setEditYear(s.year || "");
+    setEditJoiningYear(s.joining_year?.toString() || "");
+    setEditAge(s.age?.toString() || "");
+    setEditContact(s.contact_number || "");
   };
 
   const handleSaveEdit = async () => {
@@ -87,7 +100,9 @@ export default function StudentsPage() {
       .update({
         full_name: editName,
         department: editDept || null,
-        year: editYear || null,
+        joining_year: parseInt(editJoiningYear) || null,
+        age: parseInt(editAge) || null,
+        contact_number: editContact || null,
       })
       .eq("user_id", editStudent.user_id);
     if (error) toast.error(error.message);
@@ -100,7 +115,6 @@ export default function StudentsPage() {
   };
 
   const handleDelete = async (userId: string) => {
-    // Delete profile (cascade should handle roles)
     const { error } = await supabase.from("profiles").delete().eq("user_id", userId);
     if (error) toast.error(error.message);
     else {
@@ -111,8 +125,8 @@ export default function StudentsPage() {
 
   const filteredStudents = students.filter(
     (s) =>
-      s.full_name.toLowerCase().includes(search.toLowerCase()) ||
-      s.email.toLowerCase().includes(search.toLowerCase()) ||
+      (s.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (s.email || "").toLowerCase().includes(search.toLowerCase()) ||
       (s.department || "").toLowerCase().includes(search.toLowerCase())
   );
 
@@ -154,9 +168,9 @@ export default function StudentsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
                   <TableHead>Department</TableHead>
-                  <TableHead>Year</TableHead>
+                  <TableHead>Year of Study</TableHead>
+                  <TableHead>Contact</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -164,10 +178,12 @@ export default function StudentsPage() {
               <TableBody>
                 {filteredStudents.map((s) => (
                   <TableRow key={s.id}>
-                    <TableCell className="font-medium">{s.full_name || "—"}</TableCell>
-                    <TableCell className="text-sm">{s.email}</TableCell>
+                    <TableCell className="font-medium cursor-pointer hover:text-primary transition-colors" onClick={() => setViewStudent(s)}>
+                      {s.full_name || "—"}
+                    </TableCell>
                     <TableCell>{s.department || "—"}</TableCell>
-                    <TableCell>{s.year || "—"}</TableCell>
+                    <TableCell>{s.year_of_study || "—"}</TableCell>
+                    <TableCell className="text-sm">{s.contact_number || "—"}</TableCell>
                     <TableCell>
                       {s.is_approved ? (
                         <Badge variant="outline" className="bg-success/20 text-success border-success/30">Active</Badge>
@@ -212,6 +228,65 @@ export default function StudentsPage() {
         </CardContent>
       </Card>
 
+      {/* View Detail Dialog */}
+      <Dialog open={!!viewStudent} onOpenChange={(open) => !open && setViewStudent(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display">Student Profile</DialogTitle>
+          </DialogHeader>
+          {viewStudent && (
+            <div className="space-y-4 pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground uppercase">Full Name</Label>
+                  <p className="font-medium">{viewStudent.full_name}</p>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground uppercase">Email</Label>
+                  <p className="font-medium truncate">{viewStudent.email}</p>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground uppercase">Department</Label>
+                  <p className="font-medium">{viewStudent.department || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground uppercase">Year of Study</Label>
+                  <p className="font-medium">{viewStudent.year_of_study || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground uppercase">Joining Year</Label>
+                  <p className="font-medium">{viewStudent.joining_year || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground uppercase">End Year</Label>
+                  <p className="font-medium">{viewStudent.end_year || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground uppercase">Age / DOB</Label>
+                  <p className="font-medium">{viewStudent.age}Y ({viewStudent.dob ? new Date(viewStudent.dob).toLocaleDateString() : "—"})</p>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground uppercase">Gender</Label>
+                  <p className="font-medium capitalize">{viewStudent.gender || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground uppercase">Contact No.</Label>
+                  <p className="font-medium">{viewStudent.contact_number || "—"}</p>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground uppercase">WhatsApp No.</Label>
+                  <p className="font-medium">{viewStudent.whatsapp_number || "—"}</p>
+                </div>
+                <div className="space-y-1 col-span-2">
+                  <Label className="text-xs text-muted-foreground uppercase">Father's Name</Label>
+                  <p className="font-medium">{viewStudent.father_name || "—"}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Edit Dialog */}
       <Dialog open={!!editStudent} onOpenChange={(open) => !open && setEditStudent(null)}>
         <DialogContent>
@@ -225,29 +300,21 @@ export default function StudentsPage() {
             </div>
             <div className="space-y-2">
               <Label>Department</Label>
-              <Select value={editDept} onValueChange={setEditDept}>
-                <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CS">Computer Science</SelectItem>
-                  <SelectItem value="IT">Information Technology</SelectItem>
-                  <SelectItem value="ECE">Electronics</SelectItem>
-                  <SelectItem value="EEE">Electrical</SelectItem>
-                  <SelectItem value="MECH">Mechanical</SelectItem>
-                  <SelectItem value="CIVIL">Civil</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input value={editDept} onChange={(e) => setEditDept(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Joining Year</Label>
+                <Input type="number" value={editJoiningYear} onChange={(e) => setEditJoiningYear(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Age</Label>
+                <Input type="number" value={editAge} onChange={(e) => setEditAge(e.target.value)} />
+              </div>
             </div>
             <div className="space-y-2">
-              <Label>Year</Label>
-              <Select value={editYear} onValueChange={setEditYear}>
-                <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1st Year</SelectItem>
-                  <SelectItem value="2">2nd Year</SelectItem>
-                  <SelectItem value="3">3rd Year</SelectItem>
-                  <SelectItem value="4">4th Year</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Contact Number</Label>
+              <Input value={editContact} onChange={(e) => setEditContact(e.target.value)} />
             </div>
             <Button onClick={handleSaveEdit} disabled={saving} className="w-full gradient-primary text-primary-foreground">
               {saving ? "Saving..." : "Save Changes"}
