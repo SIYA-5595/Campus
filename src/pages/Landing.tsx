@@ -2,47 +2,15 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import {
-  GraduationCap,
-  Shield,
-  MapPin,
-  Clock,
-  FileCheck,
-  BarChart3,
-  ChevronRight,
-} from "lucide-react";
+import { GraduationCap, Shield, MapPin, Clock, FileCheck, BarChart3, ChevronRight } from "lucide-react";
 
 const features = [
-  {
-    icon: Clock,
-    title: "Smart Attendance",
-    desc: "GPS-verified, time-restricted attendance with geofencing",
-  },
-  {
-    icon: MapPin,
-    title: "Campus Geofencing",
-    desc: "200m radius verification using Haversine formula",
-  },
-  {
-    icon: FileCheck,
-    title: "Document Portal",
-    desc: "Upload, verify and manage student documents seamlessly",
-  },
-  {
-    icon: Shield,
-    title: "Role-Based Access",
-    desc: "Secure access control for students, staff and admins",
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics Dashboard",
-    desc: "Real-time insights into attendance and performance",
-  },
-  {
-    icon: GraduationCap,
-    title: "Academic Hub",
-    desc: "Timetables, marksheets, blogs, events and more",
-  },
+  { icon: Clock, title: "Smart Attendance", desc: "GPS-verified, time-restricted attendance with geofencing" },
+  { icon: MapPin, title: "Campus Geofencing", desc: "200m radius verification using Haversine formula" },
+  { icon: FileCheck, title: "Document Portal", desc: "Upload, verify and manage student documents seamlessly" },
+  { icon: Shield, title: "Role-Based Access", desc: "Secure access control for students, staff and admins" },
+  { icon: BarChart3, title: "Analytics Dashboard", desc: "Real-time insights into attendance and performance" },
+  { icon: GraduationCap, title: "Academic Hub", desc: "Timetables, marksheets, blogs, events and more" },
 ];
 
 export default function Landing() {
@@ -57,17 +25,17 @@ export default function Landing() {
             <div className="h-9 w-9 rounded-lg gradient-primary flex items-center justify-center">
               <GraduationCap className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-display font-bold text-lg">My College</span>
+            <span className="font-display font-bold text-lg">Pope's College</span>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="link" className="text-muted-foreground hidden md:flex" onClick={() => navigate("/login?mode=admin")}>
+              Admin Portal
+            </Button>
             <ThemeToggle />
             <Button variant="ghost" onClick={() => navigate("/login")}>
               Sign In
             </Button>
-            <Button
-              className="gradient-primary text-primary-foreground"
-              onClick={() => navigate("/signup")}
-            >
+            <Button className="gradient-primary text-primary-foreground" onClick={() => navigate("/signup")}>
               Get Started
             </Button>
           </div>
@@ -88,12 +56,12 @@ export default function Landing() {
               Secure College Management Portal
             </div>
             <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 leading-tight">
-              My College <span className="gradient-text">IT Portal</span>
+              Pope's College{" "}
+              <span className="gradient-text">IT Portal</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              A modern, GPS-verified attendance system with role-based access,
-              document management, and real-time analytics — built for the
-              future of education.
+              A modern, GPS-verified attendance system with role-based access, document management, 
+              and real-time analytics — built for the future of education.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
@@ -117,10 +85,7 @@ export default function Landing() {
           {/* Floating gradient orbs */}
           <div className="relative mt-20 max-w-4xl mx-auto">
             <div className="absolute -top-10 -left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float" />
-            <div
-              className="absolute -bottom-10 -right-10 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-float"
-              style={{ animationDelay: "1.5s" }}
-            />
+            <div className="absolute -bottom-10 -right-10 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "1.5s" }} />
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -129,28 +94,16 @@ export default function Landing() {
             >
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 <div className="text-center p-4">
-                  <p className="text-3xl font-display font-bold gradient-text">
-                    500+
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Active Students
-                  </p>
+                  <p className="text-3xl font-display font-bold gradient-text">500+</p>
+                  <p className="text-sm text-muted-foreground mt-1">Active Students</p>
                 </div>
                 <div className="text-center p-4">
-                  <p className="text-3xl font-display font-bold gradient-text">
-                    98%
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Attendance Accuracy
-                  </p>
+                  <p className="text-3xl font-display font-bold gradient-text">98%</p>
+                  <p className="text-sm text-muted-foreground mt-1">Attendance Accuracy</p>
                 </div>
                 <div className="text-center p-4 col-span-2 md:col-span-1">
-                  <p className="text-3xl font-display font-bold gradient-text">
-                    24/7
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Portal Access
-                  </p>
+                  <p className="text-3xl font-display font-bold gradient-text">24/7</p>
+                  <p className="text-sm text-muted-foreground mt-1">Portal Access</p>
                 </div>
               </div>
             </motion.div>
@@ -166,8 +119,7 @@ export default function Landing() {
               Everything You Need
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              A comprehensive platform for managing every aspect of college
-              operations.
+              A comprehensive platform for managing every aspect of college operations.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -183,9 +135,7 @@ export default function Landing() {
                   <div className="h-11 w-11 rounded-lg gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <f.icon className="h-5 w-5 text-primary-foreground" />
                   </div>
-                  <h3 className="font-display font-semibold text-lg mb-2">
-                    {f.title}
-                  </h3>
+                  <h3 className="font-display font-semibold text-lg mb-2">{f.title}</h3>
                   <p className="text-sm text-muted-foreground">{f.desc}</p>
                 </div>
               </motion.div>
@@ -197,7 +147,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 px-4">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
-          © 2026 My College IT Portal. All rights reserved.
+          © 2026 Pope's College IT Portal. All rights reserved.
         </div>
       </footer>
     </div>
