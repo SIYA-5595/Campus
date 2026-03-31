@@ -4,7 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { GraduationCap, Loader2 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
@@ -31,7 +37,9 @@ export default function Signup() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Account created! An admin will review and approve your account.");
+      toast.success(
+        "Account created! An admin will review and approve your account.",
+      );
       navigate("/login");
     }
   };
@@ -46,31 +54,62 @@ export default function Signup() {
           <div className="mx-auto h-12 w-12 rounded-xl gradient-primary flex items-center justify-center mb-4">
             <GraduationCap className="h-6 w-6 text-primary-foreground" />
           </div>
-          <CardTitle className="font-display text-2xl">Create Account</CardTitle>
-          <CardDescription>Join Pope's College IT Portal</CardDescription>
+          <CardTitle className="font-display text-2xl">
+            Create Account
+          </CardTitle>
+          <CardDescription>Join My College IT Portal</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
-              <Input id="name" placeholder="John Doe" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+              <Input
+                id="name"
+                placeholder="John Doe"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@college.edu" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@college.edu"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
             </div>
-            <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={loading}>
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            <Button
+              type="submit"
+              className="w-full gradient-primary text-primary-foreground"
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
               Create Account
             </Button>
           </form>
           <p className="text-center text-sm text-muted-foreground mt-4">
             Already have an account?{" "}
-            <Link to="/login" className="text-primary hover:underline">Sign in</Link>
+            <Link to="/login" className="text-primary hover:underline">
+              Sign in
+            </Link>
           </p>
         </CardContent>
       </Card>

@@ -4,7 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { GraduationCap, Loader2 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
@@ -18,7 +24,10 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     setLoading(false);
     if (error) {
       toast.error(error.message);
@@ -38,29 +47,56 @@ export default function Login() {
             <GraduationCap className="h-6 w-6 text-primary-foreground" />
           </div>
           <CardTitle className="font-display text-2xl">Welcome Back</CardTitle>
-          <CardDescription>Sign in to Pope's College IT Portal</CardDescription>
+          <CardDescription>Sign in to My College IT Portal</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@college.edu" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@college.edu"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </div>
-            <Button type="submit" className="w-full gradient-primary text-primary-foreground" disabled={loading}>
-              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            <Button
+              type="submit"
+              className="w-full gradient-primary text-primary-foreground"
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
               Sign In
             </Button>
           </form>
           <p className="text-center text-sm text-muted-foreground mt-4">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-primary hover:underline">Sign up</Link>
+            <Link to="/signup" className="text-primary hover:underline">
+              Sign up
+            </Link>
           </p>
           <p className="text-center text-sm mt-2">
-            <Link to="/" className="text-muted-foreground hover:text-foreground">← Back to home</Link>
+            <Link
+              to="/"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              ← Back to home
+            </Link>
           </p>
         </CardContent>
       </Card>
