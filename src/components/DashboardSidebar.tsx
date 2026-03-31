@@ -55,10 +55,10 @@ export function DashboardSidebar() {
   const location = useLocation();
 
   const isPrimaryAdmin = user?.email === "admin@demo.com";
-  const items = role === "student" ? studentItems : [
+  const items = role === "admin" || role === "staff" ? [
     ...staffItems,
     ...(isPrimaryAdmin ? [{ title: "Admin Mgmt", url: "/dashboard/admin-management", icon: ShieldCheck }] : [])
-  ];
+  ] : studentItems;
   const isActive = (path: string) => location.pathname === path;
 
   return (
