@@ -47,23 +47,34 @@ export default function Login() {
         .eq("user_id", data.user.id)
         .limit(1)
         .maybeSingle();
-        
-      const userRole = roleData?.role || "student";
-      
+
+      // No role record means this account was deleted from the system
+      if (!roleData) {
+        await supabase.auth.signOut();
+        toast.error(
+          "Your account has been removed from the system. Please contact the administrator to re-register.",
+          { duration: 6000 }
+        );
+        setLoading(false);
+        return;
+      }
+
+      const userRole = roleData.role;
+
       if (mode === "admin" && userRole !== "admin" && userRole !== "staff") {
         await supabase.auth.signOut();
         toast.error("Access denied. Admin portal is restricted.");
         setLoading(false);
         return;
       }
-      
+
       if (mode === "student" && (userRole === "admin" || userRole === "staff")) {
         await supabase.auth.signOut();
         toast.error("Please use the Admin Portal to sign in.");
         setLoading(false);
         return;
       }
-      
+
       setLoading(false);
       navigate("/dashboard");
     }

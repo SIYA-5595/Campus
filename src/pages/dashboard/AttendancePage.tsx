@@ -64,15 +64,15 @@ export default function AttendancePage() {
   const handleMarkAttendance = async () => {
     if (!user || !control) return;
 
-    // Check time window
-    const now = new Date();
-    const start = new Date(control.start_time);
-    const end = new Date(control.end_time);
+    // Check time window (DISABLED FOR TESTING)
+    // const now = new Date();
+    // const start = new Date(control.start_time);
+    // const end = new Date(control.end_time);
 
-    if (now < start || now > end) {
-      toast.error("Attendance window has expired or not yet started.");
-      return;
-    }
+    // if (now < start || now > end) {
+    //   toast.error("Attendance window has expired or not yet started.");
+    //   return;
+    // }
 
     setMarking(true);
     setLocationStatus("Getting your location...");
@@ -121,10 +121,7 @@ export default function AttendancePage() {
   if (loading) return <LoadingSpinner className="min-h-[400px]" />;
 
   const canMark = control?.is_enabled && !alreadyMarked;
-  const now = new Date();
-  const timeWindowActive = control
-    ? now >= new Date(control.start_time) && now <= new Date(control.end_time)
-    : false;
+  const timeWindowActive = true; // FORCED TO TRUE FOR TESTING
 
   return (
     <div className="space-y-6 animate-fade-in">

@@ -23,7 +23,7 @@ export default function Signup() {
   const { session } = useAuth();
   const [step, setStep] = useState<"signup" | "verify">("signup");
 
-  // 8-digit OTP state (Supabase sends 8-digit codes)
+  // 8-digit OTP state (Supabase default)
   const [otp, setOtp] = useState(["", "", "", "", "", "", "", ""]);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -76,13 +76,13 @@ export default function Signup() {
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/signup?verify=true&email=${encodeURIComponent(email)}`,
+        // No emailRedirectTo — forces Supabase to send a 6-digit OTP code instead of a magic link
       },
     });
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     setStep("verify");
-    toast.success("A 6-digit verification code has been sent to your email!");
+    toast.success("An 8-digit verification code has been sent to your email!");
   };
 
   const handleOtpChange = (index: number, value: string) => {
@@ -90,7 +90,7 @@ export default function Signup() {
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1); // only last char
     setOtp(newOtp);
-    if (value && index < 5) otpRefs.current[index + 1]?.focus();
+    if (value && index < 7) otpRefs.current[index + 1]?.focus(); // auto-advance up to box 7
   };
 
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
@@ -101,18 +101,18 @@ export default function Signup() {
 
   const handleOtpPaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 8);
     const newOtp = [...otp];
-    for (let i = 0; i < 6; i++) newOtp[i] = pasted[i] || "";
+    for (let i = 0; i < 8; i++) newOtp[i] = pasted[i] || "";
     setOtp(newOtp);
     const nextEmpty = newOtp.findIndex((v) => !v);
-    otpRefs.current[nextEmpty === -1 ? 5 : nextEmpty]?.focus();
+    otpRefs.current[nextEmpty === -1 ? 7 : nextEmpty]?.focus();
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     const code = otp.join("");
-    if (code.length < 6) { toast.error("Please enter the full 6-digit code."); return; }
+    if (code.length < 8) { toast.error("Please enter the full 8-digit code."); return; }
     setLoading(true);
 
     const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: "signup" });
@@ -158,7 +158,7 @@ export default function Signup() {
           <CardDescription>
             {step === "signup"
               ? `${inviteToken ? "Admin" : "Student"} Registration - Pope's College IT Portal`
-              : `Enter the 6-digit code sent to ${email}`}
+              : `Enter the 8-digit code sent to ${email}`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -186,7 +186,7 @@ export default function Signup() {
               {/* OTP Boxes */}
               <div className="space-y-3">
                 <Label className="block text-center text-sm text-muted-foreground">
-                  Enter the 6-digit code from your inbox
+                  Enter the 8-digit code from your inbox
                 </Label>
                 <div className="flex gap-2 justify-center" onPaste={handleOtpPaste}>
                   {otp.map((digit, i) => (
@@ -205,7 +205,7 @@ export default function Signup() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full gradient-primary text-primary-foreground h-11" disabled={loading || otp.join("").length < 6}>
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground h-11" disabled={loading || otp.join("").length < 8}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Verify & Continue
               </Button>

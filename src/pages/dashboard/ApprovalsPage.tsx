@@ -49,7 +49,21 @@ export default function ApprovalsPage() {
     if (error) {
       toast.error(error.message);
     } else {
-      setStudents((profileData || []) as unknown as Student[]);
+      const processedStudents = (profileData || []).map((s: any) => {
+        let yearOfStudy = "Alumni";
+        if (s.joining_year) {
+          const currentYear = new Date().getFullYear();
+          const diff = currentYear - s.joining_year;
+          if (diff === 0) yearOfStudy = "1st Year";
+          else if (diff === 1) yearOfStudy = "2nd Year";
+          else if (diff === 2) yearOfStudy = "3rd Year";
+        }
+        return {
+          ...s,
+          year_of_study: yearOfStudy,
+        };
+      });
+      setStudents(processedStudents as unknown as Student[]);
     }
     setLoading(false);
   };
@@ -67,11 +81,7 @@ export default function ApprovalsPage() {
     }
   };
 
-  const handleReject = async (userId: string) => {
-    // Optionally delete or just mark as rejected. Here we just keep them as is (not approved).
-    // Or we could delete the profile if desired. Let's ask or just provide a "Delete" option.
-    toast.info("Account remains in pending state. Use 'Delete' to remove entirely.");
-  };
+
 
   const handleDelete = async (userId: string) => {
     const { error } = await supabase.from("profiles").delete().eq("user_id", userId);
@@ -117,10 +127,13 @@ export default function ApprovalsPage() {
               <TableBody>
                 {students.map((s) => (
                   <TableRow key={s.id}>
-                    <TableCell className="font-medium">
+                    <TableCell 
+                      className={`font-medium ${s.department ? 'cursor-pointer hover:text-primary transition-colors' : ''}`}
+                      onClick={() => s.department && setViewStudent(s)}
+                    >
                       <div className="flex flex-col">
                         <span>{s.full_name || "New Applicant"}</span>
-                        {!(s as any).onboarding_completed && (
+                        {!s.department && (
                           <Badge variant="outline" className="w-fit text-[10px] h-4 px-1 bg-muted/50">Details Pending</Badge>
                         )}
                       </div>
@@ -137,7 +150,7 @@ export default function ApprovalsPage() {
                           size="icon"
                           onClick={() => setViewStudent(s)}
                           title="View Details"
-                          disabled={!(s as any).onboarding_completed}
+                          disabled={!s.department}
                         >
                           <Info className="h-4 w-4 text-primary" />
                         </Button>
@@ -146,7 +159,7 @@ export default function ApprovalsPage() {
                           size="icon"
                           onClick={() => handleApprove(s.user_id)}
                           title="Approve"
-                          disabled={!(s as any).onboarding_completed}
+                          disabled={!s.department}
                         >
                           <CheckCircle className="h-4 w-4 text-success" />
                         </Button>

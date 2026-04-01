@@ -28,11 +28,8 @@ export default function Dashboard() {
   if (loading) return <PageLoader />;
   if (!user) return <Navigate to="/login" replace />;
 
-  // 0. Wait for profile for students
-  if (role === "student" && !profile) return <PageLoader />;
-
   // 1. Show Finish Onboarding prompt for students
-  if (role === "student" && profile && !profile.onboarding_completed) {
+  if (role === "student" && (!profile || !profile.onboarding_completed)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4 relative overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
