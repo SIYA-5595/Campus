@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { StatusBadge } from "@/components/StatusBadge";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Clock, MapPin, Settings, Eye, Edit, Trash2, Plus } from "lucide-react";
+import { Clock, MapPin, Settings, Eye, Edit, Trash2, Plus, Users, BookOpen, GraduationCap, Award, Calendar, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -42,10 +42,15 @@ export default function AttendanceControlPage() {
   const { user } = useAuth();
   const [controls, setControls] = useState<ControlRecord[]>([]);
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
-  const [profiles, setProfiles] = useState<Record<string, string>>({});
+  const [profiles, setProfiles] = useState<Record<string, { full_name: string, year_of_study: string }>>({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewDate, setViewDate] = useState<string | null>(null);
+  const [mainView, setMainView] = useState<"control" | "reports">("control");
+  const [reportMonth, setReportMonth] = useState((new Date().getMonth() + 1).toString());
+  const [reportYear, setReportYear] = useState(new Date().getFullYear().toString());
+  const [reportRecords, setReportRecords] = useState<AttendanceRecord[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("All");
   const [editRecord, setEditRecord] = useState<AttendanceRecord | null>(null);
   const [editStatus, setEditStatus] = useState("present");
 
@@ -64,6 +69,27 @@ export default function AttendanceControlPage() {
     fetchData();
   }, []);
 
+  const fetchReportData = async () => {
+    const startDate = new Date(parseInt(reportYear), parseInt(reportMonth) - 1, 1);
+    const endDate = new Date(parseInt(reportYear), parseInt(reportMonth), 0);
+    
+    setLoading(true);
+    const { data } = await supabase
+      .from("attendance")
+      .select("*")
+      .gte("date", format(startDate, "yyyy-MM-dd"))
+      .lte("date", format(endDate, "yyyy-MM-dd"));
+    
+    setReportRecords((data || []) as AttendanceRecord[]);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (mainView === "reports") {
+      fetchReportData();
+    }
+  }, [mainView, reportMonth, reportYear]);
+
   const fetchData = async () => {
     setLoading(true);
     const { data: controlData } = await supabase
@@ -73,10 +99,18 @@ export default function AttendanceControlPage() {
       .limit(30);
     setControls((controlData || []) as ControlRecord[]);
 
-    const { data: profileData } = await supabase.from("profiles").select("user_id, full_name");
-    const map: Record<string, string> = {};
-    (profileData || []).forEach((p: { user_id: string; full_name: string }) => {
-      map[p.user_id] = p.full_name;
+    const { data: profileData } = await supabase.from("profiles").select("user_id, full_name, joining_year");
+    const map: Record<string, { full_name: string, year_of_study: string }> = {};
+    (profileData || []).forEach((p: any) => {
+      let yearOfStudy = "Alumni";
+      if (p.joining_year) {
+        const currentYear = new Date().getFullYear();
+        const diff = currentYear - p.joining_year;
+        if (diff === 0) yearOfStudy = "1st Year";
+        else if (diff === 1) yearOfStudy = "2nd Year";
+        else if (diff === 2) yearOfStudy = "3rd Year";
+      }
+      map[p.user_id] = { full_name: p.full_name, year_of_study: yearOfStudy };
     });
     setProfiles(map);
     setLoading(false);
@@ -165,12 +199,54 @@ export default function AttendanceControlPage() {
     }
   };
 
+  const YEAR_TABS = [
+    { key: "All", label: "All Students", icon: <Users className="h-4 w-4" />, color: "from-gray-500 to-slate-500" },
+    { key: "1st Year", label: "1st Year", icon: <BookOpen className="h-4 w-4" />, color: "from-blue-500 to-cyan-500" },
+    { key: "2nd Year", label: "2nd Year", icon: <BookOpen className="h-4 w-4" />, color: "from-violet-500 to-purple-500" },
+    { key: "3rd Year", label: "3rd Year", icon: <GraduationCap className="h-4 w-4" />, color: "from-orange-500 to-amber-500" },
+    { key: "Alumni", label: "Alumni", icon: <Award className="h-4 w-4" />, color: "from-emerald-500 to-teal-500" },
+  ];
+
+  const filteredRecords = attendanceRecords.filter((r) => activeTab === "All" || profiles[r.user_id]?.year_of_study === activeTab);
+  const reportFilteredRecords = reportRecords.filter((r) => activeTab === "All" || profiles[r.user_id]?.year_of_study === activeTab);
+
+  const reportStatsRaw = reportFilteredRecords.reduce((acc, r) => {
+    if (!acc[r.user_id]) acc[r.user_id] = { present: 0, absent: 0, total: 0 };
+    acc[r.user_id].total++;
+    if (r.status === "present") acc[r.user_id].present++;
+    if (r.status === "absent") acc[r.user_id].absent++;
+    return acc;
+  }, {} as Record<string, { present: number; absent: number; total: number }>);
+
+  // Get unique user IDs for the report table
+  const reportUserIds = Object.keys(reportStatsRaw);
+
+
   if (loading) return <LoadingSpinner className="min-h-[400px]" />;
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-display font-bold">Attendance Control</h2>
+      <div className="flex gap-2 border-b border-border/50 pb-4">
+        <Button 
+          variant={mainView === "control" ? "default" : "ghost"} 
+          onClick={() => setMainView("control")}
+          className={mainView === "control" ? "gradient-primary text-primary-foreground" : ""}
+        >
+          Daily Controls
+        </Button>
+        <Button 
+          variant={mainView === "reports" ? "default" : "ghost"} 
+          onClick={() => setMainView("reports")}
+          className={mainView === "reports" ? "gradient-primary text-primary-foreground" : ""}
+        >
+          Monthly & Yearly Reports
+        </Button>
+      </div>
+
+      {mainView === "control" ? (
+        <>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-display font-bold">Attendance Control</h2>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gradient-primary text-primary-foreground">
@@ -298,8 +374,42 @@ export default function AttendanceControlPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {attendanceRecords.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No attendance records for this date.</p>
+            {/* Year Tabs */}
+            <div className="flex gap-2 flex-wrap mb-4">
+              {YEAR_TABS.map((tab) => {
+                const count = activeTab === tab.key ? filteredRecords.length : attendanceRecords.filter((r) => tab.key === "All" || profiles[r.user_id]?.year_of_study === tab.key).length;
+                const isActive = activeTab === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`
+                      relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
+                      transition-all duration-200 border
+                      ${
+                        isActive
+                          ? "bg-gradient-to-r " + tab.color + " text-white border-transparent shadow-lg scale-[1.02]"
+                          : "bg-card/60 text-muted-foreground border-border/50 hover:bg-card hover:text-foreground hover:border-border"
+                      }
+                    `}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                    <span
+                      className={`
+                        inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold
+                        ${isActive ? "bg-white/25 text-white" : "border"}
+                      `}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {filteredRecords.length === 0 ? (
+              <p className="text-sm text-muted-foreground mt-4">No attendance records found for {activeTab}.</p>
             ) : (
               <Table>
                 <TableHeader>
@@ -312,9 +422,14 @@ export default function AttendanceControlPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {attendanceRecords.map((r) => (
+                  {filteredRecords.map((r) => (
                     <TableRow key={r.id}>
-                      <TableCell className="font-medium">{profiles[r.user_id] || r.user_id.slice(0, 8)}</TableCell>
+                      <TableCell className="font-medium">
+                        {profiles[r.user_id]?.full_name || r.user_id.slice(0, 8)}
+                        <span className="ml-2 text-xs text-muted-foreground opacity-60">
+                           ({profiles[r.user_id]?.year_of_study})
+                        </span>
+                      </TableCell>
                       <TableCell>{format(new Date(r.marked_at), "hh:mm a")}</TableCell>
                       <TableCell className="text-xs">
                         {r.latitude?.toFixed(4)}, {r.longitude?.toFixed(4)}
@@ -357,7 +472,7 @@ export default function AttendanceControlPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Student</Label>
-              <p className="text-sm">{editRecord ? profiles[editRecord.user_id] || editRecord.user_id : ""}</p>
+              <p className="text-sm">{editRecord ? profiles[editRecord.user_id]?.full_name || editRecord.user_id : ""}</p>
             </div>
             <div className="space-y-2">
               <Label>Status</Label>
@@ -375,6 +490,134 @@ export default function AttendanceControlPage() {
           </div>
         </DialogContent>
       </Dialog>
+        </>
+      ) : (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <h2 className="text-2xl font-display font-bold">Attendance Reports</h2>
+            <div className="flex gap-3">
+              <Select value={reportMonth} onValueChange={setReportMonth}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <SelectItem key={i + 1} value={(i + 1).toString()}>
+                      {format(new Date(2000, i, 1), "MMMM")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={reportYear} onValueChange={setReportYear}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 5 }).map((_, i) => {
+                    const year = new Date().getFullYear() - i;
+                    return (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="font-display flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" /> Report for {format(new Date(parseInt(reportYear), parseInt(reportMonth) - 1, 1), "MMMM yyyy")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Year Tabs */}
+              <div className="flex gap-2 flex-wrap mb-6">
+                {YEAR_TABS.map((tab) => {
+                  const count = activeTab === tab.key ? reportFilteredRecords.length : reportRecords.filter((r) => tab.key === "All" || profiles[r.user_id]?.year_of_study === tab.key).length;
+                  const isActive = activeTab === tab.key;
+                  return (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key)}
+                      className={`
+                        relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
+                        transition-all duration-200 border
+                        ${
+                          isActive
+                            ? "bg-gradient-to-r " + tab.color + " text-white border-transparent shadow-lg scale-[1.02]"
+                            : "bg-card/60 text-muted-foreground border-border/50 hover:bg-card hover:text-foreground hover:border-border"
+                        }
+                      `}
+                    >
+                      {tab.icon}
+                      <span>{tab.label}</span>
+                      <span
+                        className={`
+                          inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold
+                          ${isActive ? "bg-white/25 text-white" : "border"}
+                        `}
+                      >
+                        {new Set(reportRecords.filter((r) => tab.key === "All" || profiles[r.user_id]?.year_of_study === tab.key).map(r => r.user_id)).size} students
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {reportUserIds.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground">
+                  <Calendar className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                  <p>No attendance data recorded for {activeTab} in this period.</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Student</TableHead>
+                      <TableHead>Year of Study</TableHead>
+                      <TableHead className="text-center">Days Present</TableHead>
+                      <TableHead className="text-center">Total Classes</TableHead>
+                      <TableHead className="text-right">Attendance %</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reportUserIds.map((userId) => {
+                      const stats = reportStatsRaw[userId];
+                      const percentage = Math.round((stats.present / stats.total) * 100);
+                      return (
+                        <TableRow key={userId}>
+                          <TableCell className="font-medium">
+                            {profiles[userId]?.full_name || userId.slice(0, 8)}
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-xs px-2 py-1 bg-muted rounded-full">
+                              {profiles[userId]?.year_of_study || "Unknown"}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-center font-medium text-success">
+                            {stats.present}
+                          </TableCell>
+                          <TableCell className="text-center text-muted-foreground">
+                            {stats.total}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <span className={`inline-flex items-center justify-center px-2 py-1 rounded font-bold text-xs ${percentage >= 75 ? 'bg-success/20 text-success' : percentage >= 50 ? 'bg-warning/20 text-warning' : 'bg-destructive/20 text-destructive'}`}>
+                              {percentage}%
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
