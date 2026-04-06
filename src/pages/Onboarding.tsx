@@ -88,15 +88,15 @@ export default function Onboarding() {
   };
 
   useEffect(() => {
-    if (profile) {
+    if (user || profile) {
       setFormData((prev) => ({
         ...prev,
-        full_name: profile.full_name || "",
-        email: profile.email || "",
+        full_name: profile?.full_name || user?.user_metadata?.full_name || "",
+        email: profile?.email || user?.email || "",
         department: "B.Sc Information Technology",
       }));
     }
-  }, [profile]);
+  }, [profile, user]);
 
   useEffect(() => {
     if (formData.joining_year && !isNaN(parseInt(formData.joining_year))) {
@@ -131,21 +131,23 @@ export default function Onboarding() {
     setLoading(true);
     const { error } = await supabase
       .from("profiles")
-      .update({
-        full_name: formData.full_name,
-        dob: formData.dob,
-        age: parseInt(formData.age),
-        contact_number: formData.contact_number,
-        whatsapp_number: formData.whatsapp_number,
-        gender: formData.gender,
-        father_name: formData.father_name,
-        department: formData.department,
-        joining_year: parseInt(formData.joining_year),
-        end_year: parseInt(formData.end_year),
-        year_of_study: formData.year_of_study,
-        onboarding_completed: true,
-      })
-      .eq("user_id", user.id);
+      .upsert(
+        {
+          user_id: user.id,
+          full_name: formData.full_name,
+          email: formData.email,
+          dob: formData.dob || null,
+          age: parseInt(formData.age) || null,
+          contact_number: formData.contact_number,
+          whatsapp_number: formData.whatsapp_number,
+          gender: formData.gender,
+          father_name: formData.father_name,
+          department: formData.department,
+          joining_year: parseInt(formData.joining_year) || null,
+          end_year: parseInt(formData.end_year) || null,
+        },
+        { onConflict: "user_id" }
+      );
 
     if (error) {
       setLoading(false);
@@ -173,7 +175,7 @@ export default function Onboarding() {
             <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center shadow-lg">
               <GraduationCap className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="font-display font-bold text-xl">Pope's College</span>
+            <span className="font-display font-bold text-xl">My College</span>
           </div>
           <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="text-muted-foreground">
             <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard

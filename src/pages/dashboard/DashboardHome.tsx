@@ -40,6 +40,7 @@ export default function DashboardHome() {
         }
 
         const pendingStudents = studentProfiles.filter((p: { is_approved: boolean | null }) => !p.is_approved).length;
+
         setStats({
           attendance: att.count || 0,
           documents: docs.count || 0,
@@ -62,7 +63,7 @@ export default function DashboardHome() {
           Welcome back, {profile?.full_name || (isStaff ? "Staff" : "Student")} 👋
         </h2>
         <p className="text-muted-foreground">
-          {isStaff ? "Manage students, attendance, and documents." : "Here's what's happening at Pope's College today."}
+          {isStaff ? "Manage students, attendance, and documents." : "Here's what's happening at My College today."}
         </p>
       </div>
 

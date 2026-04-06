@@ -58,19 +58,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Fetch role and profile with setTimeout to avoid deadlock
           setTimeout(async () => {
             const [roleRes, profileRes] = await Promise.all([
-              supabase.from("user_roles").select("role").eq("user_id", session.user.id).limit(1).single(),
-              supabase.from("profiles").select("*").eq("user_id", session.user.id).limit(1).single(),
+              supabase.from("user_roles").select("role").eq("user_id", session.user.id).limit(1).maybeSingle(),
+              supabase.from("profiles").select("*").eq("user_id", session.user.id).limit(1).maybeSingle(),
             ]);
-            if (roleRes.data) {
-              setRole(roleRes.data.role as AppRole);
-            } else {
-              // Auto-assign student role if no role exists
-              const { error: roleError } = await supabase
-                .from("user_roles")
-                .insert({ user_id: session.user.id, role: "student" });
-              if (!roleError) setRole("student");
+
+            if (!roleRes.data) {
+              // No role record found — this user was deleted from the system.
+              // Sign them out immediately so they cannot access the app.
+              await supabase.auth.signOut();
+              setSession(null);
+              setUser(null);
+              setRole(null);
+              setProfile(null);
+              setLoading(false);
+              return;
             }
-            if (profileRes.data) setProfile(profileRes.data as AuthContextType["profile"]);
+
+            setRole(roleRes.data.role as AppRole);
+
+            if (profileRes.data) {
+              const profileData = profileRes.data as AuthContextType["profile"];
+              if (profileData) {
+                profileData.onboarding_completed = !!profileData.department || !!profileData.is_approved;
+                if (profileData.joining_year) {
+                  const diff = new Date().getFullYear() - profileData.joining_year;
+                  if (diff === 0) profileData.year_of_study = "1st Year";
+                  else if (diff === 1) profileData.year_of_study = "2nd Year";
+                  else if (diff === 2) profileData.year_of_study = "3rd Year";
+                  else profileData.year_of_study = "Alumni";
+                }
+              }
+              setProfile(profileData);
+            }
             setLoading(false);
           }, 0);
         } else {
@@ -96,8 +115,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select("*")
       .eq("user_id", currentSession.user.id)
       .limit(1)
-      .single();
-    if (data) setProfile(data as AuthContextType["profile"]);
+      .maybeSingle();
+    if (data) {
+      const profileData = data as AuthContextType["profile"];
+      if (profileData) {
+        profileData.onboarding_completed = !!profileData.department || !!profileData.is_approved;
+        if (profileData.joining_year) {
+          const diff = new Date().getFullYear() - profileData.joining_year;
+          if (diff === 0) profileData.year_of_study = "1st Year";
+          else if (diff === 1) profileData.year_of_study = "2nd Year";
+          else if (diff === 2) profileData.year_of_study = "3rd Year";
+          else profileData.year_of_study = "Alumni";
+        }
+      }
+      setProfile(profileData);
+    }
   };
 
   const signOut = async () => {
