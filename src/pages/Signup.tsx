@@ -38,7 +38,7 @@ export default function Signup() {
           ]);
           toast.success("Admin account verified!");
         } else {
-          toast.success("Email verified! Welcome to Pope's College.");
+          toast.success("Email verified! Welcome to My College.");
         }
         navigate("/dashboard");
       }
@@ -130,7 +130,7 @@ export default function Signup() {
       ]);
       toast.success("Admin account verified!");
     } else {
-      toast.success("Email verified! Welcome to Pope's College.");
+      toast.success("Email verified! Welcome to My College.");
     }
     setLoading(false);
     navigate("/dashboard");
@@ -157,7 +157,7 @@ export default function Signup() {
           </CardTitle>
           <CardDescription>
             {step === "signup"
-              ? `${inviteToken ? "Admin" : "Student"} Registration - Pope's College IT Portal`
+              ? `${inviteToken ? "Admin" : "Student"} Registration - My College IT Portal`
               : `Enter the 8-digit code sent to ${email}`}
           </CardDescription>
         </CardHeader>

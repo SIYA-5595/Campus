@@ -70,7 +70,7 @@ export function DashboardSidebar() {
               <div className="h-7 w-7 rounded-lg gradient-primary flex items-center justify-center shrink-0">
                 <GraduationCap className="h-4 w-4 text-primary-foreground" />
               </div>
-              {!collapsed && <span className="font-display font-bold text-sm">Pope's College</span>}
+              {!collapsed && <span className="font-display font-bold text-sm">My College</span>}
             </div>
           </SidebarGroupLabel>
           <SidebarGroupContent>

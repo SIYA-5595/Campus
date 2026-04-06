@@ -175,7 +175,7 @@ export default function Onboarding() {
             <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center shadow-lg">
               <GraduationCap className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="font-display font-bold text-xl">Pope's College</span>
+            <span className="font-display font-bold text-xl">My College</span>
           </div>
           <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="text-muted-foreground">
             <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard

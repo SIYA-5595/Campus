@@ -25,7 +25,7 @@ export default function Landing() {
             <div className="h-9 w-9 rounded-lg gradient-primary flex items-center justify-center">
               <GraduationCap className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-display font-bold text-lg">Pope's College</span>
+            <span className="font-display font-bold text-lg">My College</span>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="link" className="text-muted-foreground hidden md:flex" onClick={() => navigate("/login?mode=admin")}>
@@ -56,7 +56,7 @@ export default function Landing() {
               Secure College Management Portal
             </div>
             <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 leading-tight">
-              Pope's College{" "}
+              My College{" "}
               <span className="gradient-text">IT Portal</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
@@ -147,7 +147,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 px-4">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
-          © 2026 Pope's College IT Portal. All rights reserved.
+          © 2026 My College IT Portal. All rights reserved.
         </div>
       </footer>
     </div>

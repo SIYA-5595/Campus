@@ -63,7 +63,7 @@ export default function DashboardHome() {
           Welcome back, {profile?.full_name || (isStaff ? "Staff" : "Student")} 👋
         </h2>
         <p className="text-muted-foreground">
-          {isStaff ? "Manage students, attendance, and documents." : "Here's what's happening at Pope's College today."}
+          {isStaff ? "Manage students, attendance, and documents." : "Here's what's happening at My College today."}
         </p>
       </div>
 
