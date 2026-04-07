@@ -25,14 +25,17 @@ CREATE TABLE IF NOT EXISTS public.leave_requests (
 ALTER TABLE public.leave_requests ENABLE ROW LEVEL SECURITY;
 
 -- Students can view their own leave requests
+DROP POLICY IF EXISTS "Students can view their own leave requests" ON public.leave_requests;
 CREATE POLICY "Students can view their own leave requests" ON public.leave_requests
     FOR SELECT TO authenticated USING (auth.uid() = user_id);
 
 -- Students can insert their own leave requests
+DROP POLICY IF EXISTS "Students can insert their own leave requests" ON public.leave_requests;
 CREATE POLICY "Students can insert their own leave requests" ON public.leave_requests
     FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 
 -- Admins and staff can view all leave requests
+DROP POLICY IF EXISTS "Admins/Staff can view all leave requests" ON public.leave_requests;
 CREATE POLICY "Admins/Staff can view all leave requests" ON public.leave_requests
     FOR SELECT TO authenticated USING (
         EXISTS (
@@ -43,6 +46,7 @@ CREATE POLICY "Admins/Staff can view all leave requests" ON public.leave_request
     );
 
 -- Admins and staff can update leave requests (Approve/Reject)
+DROP POLICY IF EXISTS "Admins/Staff can update leave requests" ON public.leave_requests;
 CREATE POLICY "Admins/Staff can update leave requests" ON public.leave_requests
     FOR UPDATE TO authenticated USING (
         EXISTS (

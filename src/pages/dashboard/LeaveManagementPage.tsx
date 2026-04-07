@@ -335,9 +335,21 @@ export default function LeaveManagementPage() {
                 </TableHeader>
                 <TableBody>
                   {processedLeaves.map((l) => (
-                    <TableRow key={l.id}>
+                    <TableRow key={l.id} className="hover:bg-muted/20">
                       <TableCell className="pl-6 py-3">
-                        <p className="text-xs font-semibold">{l.student_name}</p>
+                        <div
+                          className="flex items-center gap-3 cursor-pointer group"
+                          onClick={() => openStudentHistory(l.user_id, l.student_name)}
+                        >
+                          <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase shrink-0">
+                            {l.student_name[0]}
+                          </div>
+                          <div>
+                            <p className="font-bold text-xs group-hover:text-primary transition-colors">{l.student_name}</p>
+                            <p className="text-[10px] text-muted-foreground font-mono">{l.register_number}</p>
+                          </div>
+                          <ChevronRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-all text-primary" />
+                        </div>
                       </TableCell>
                       <TableCell>
                         <span className="text-[10px] uppercase font-bold text-muted-foreground">{l.leave_type}</span>
@@ -421,7 +433,7 @@ export default function LeaveManagementPage() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto bg-white p-6">
+          <div className="flex-1 overflow-auto bg-white text-slate-800 p-6">
             <div className="border border-slate-200 rounded-sm shadow-sm overflow-hidden min-w-[800px]">
               <Table>
                 <TableHeader className="bg-slate-50">
@@ -441,13 +453,13 @@ export default function LeaveManagementPage() {
                     <TableRow key={h.id} className={cn("border-b border-slate-100 hover:bg-slate-50/50 transition-colors", i % 2 === 0 ? 'bg-white' : 'bg-slate-50/30')}>
                       <TableCell className="text-center text-[11px] text-slate-500 font-medium border-r border-slate-100">{i + 1}</TableCell>
                       <TableCell className="font-bold text-[11px] text-slate-800 border-r border-slate-100 uppercase">{h.student_name}</TableCell>
-                      <TableCell className="text-[11px] font-medium border-r border-slate-100">{h.leave_type}</TableCell>
-                      <TableCell className="text-[11px] border-r border-slate-100">{format(new Date(h.from_date), "dd/MM/yyyy")}</TableCell>
-                      <TableCell className="text-[11px] border-r border-slate-100">{format(new Date(h.to_date), "dd/MM/yyyy")}</TableCell>
-                      <TableCell className="text-center font-bold text-[11px] border-r border-slate-100 px-4">{h.total_days}</TableCell>
-                      <TableCell className="text-[11px] border-r border-slate-100 py-3 leading-relaxed">
+                      <TableCell className="text-[11px] font-medium text-slate-800 border-r border-slate-100">{h.leave_type}</TableCell>
+                      <TableCell className="text-[11px] text-slate-800 border-r border-slate-100">{format(new Date(h.from_date), "dd/MM/yyyy")}</TableCell>
+                      <TableCell className="text-[11px] text-slate-800 border-r border-slate-100">{format(new Date(h.to_date), "dd/MM/yyyy")}</TableCell>
+                      <TableCell className="text-center font-bold text-[11px] text-slate-800 border-r border-slate-100 px-4">{h.total_days}</TableCell>
+                      <TableCell className="text-[11px] text-slate-800 border-r border-slate-100 py-3 leading-relaxed">
                         <div className="space-y-1">
-                          <p><span className="text-[9px] uppercase font-bold text-slate-400 mr-1.5 border px-1 rounded-sm">Purpose</span> {h.purpose}</p>
+                          <p><span className="text-[9px] uppercase font-bold text-slate-400 mr-1.5 border border-slate-200 px-1 rounded-sm">Purpose</span> <span className="text-slate-700">{h.purpose}</span></p>
                           {h.admin_note && (
                             <p className="text-destructive font-semibold italic"><span className="text-[9px] uppercase font-bold text-destructive/50 mr-1.5 border border-destructive/20 px-1 rounded-sm">Rejection Note</span> {h.admin_note}</p>
                           )}
@@ -469,16 +481,16 @@ export default function LeaveManagementPage() {
               </Table>
             </div>
             
-            <div className="mt-8 flex justify-between items-end border-t pt-6">
+            <div className="mt-8 flex justify-between items-end border-t border-slate-200 pt-6">
                <div className="space-y-4">
                   <div className="flex gap-8">
                     <div className="space-y-1">
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Report Generated</p>
-                      <p className="text-xs font-mono">{format(new Date(), "PPpp")}</p>
+                      <p className="text-xs font-mono text-slate-700">{format(new Date(), "PPpp")}</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Department</p>
-                      <p className="text-xs font-medium">{studentHistory[0]?.department || "B.Sc Information Technology"}</p>
+                      <p className="text-xs font-medium text-slate-700">{studentHistory[0]?.department || "B.Sc Information Technology"}</p>
                     </div>
                   </div>
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded text-[10px] text-slate-500 max-w-md italic">

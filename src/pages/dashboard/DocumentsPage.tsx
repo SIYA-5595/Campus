@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { StatusBadge } from "@/components/StatusBadge";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Upload, FileText } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -27,6 +28,9 @@ export default function DocumentsPage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [docType, setDocType] = useState("id_proof");
+  const [selectedDocUrl, setSelectedDocUrl] = useState<string | null>(null);
+  const [selectedDocType, setSelectedDocType] = useState<"image" | "pdf">("image");
+  const [isDocOpen, setIsDocOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const fetchDocs = useCallback(async () => {
@@ -76,6 +80,24 @@ export default function DocumentsPage() {
       fetchDocs();
     }
     setUploading(false);
+  };
+
+  const handleOpenDoc = async (fileUrl: string, fileName: string) => {
+    try {
+      const pathSegments = fileUrl.split('/documents/');
+      if (pathSegments.length < 2) throw new Error("Invalid file path format");
+      const filePath = pathSegments.slice(1).join('/documents/');
+      
+      const { data, error } = await supabase.storage.from('documents').createSignedUrl(filePath, 3600);
+      if (error) throw error;
+      if (data?.signedUrl) {
+        setSelectedDocUrl(data.signedUrl);
+        setSelectedDocType(fileName.toLowerCase().endsWith(".pdf") ? "pdf" : "image");
+        setIsDocOpen(true);
+      }
+    } catch (err: any) {
+      toast.error("Could not load secure document: " + err.message);
+    }
   };
 
   if (loading) return <LoadingSpinner className="min-h-[400px]" />;
@@ -129,7 +151,12 @@ export default function DocumentsPage() {
                   <div className="flex items-center gap-3">
                     <FileText className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="font-medium text-sm">{d.file_name}</p>
+                      <button 
+                        onClick={() => handleOpenDoc(d.file_url, d.file_name)}
+                        className="font-medium text-sm text-primary hover:underline hover:text-primary cursor-pointer text-left focus:outline-none bg-transparent border-none p-0"
+                      >
+                        {d.file_name}
+                      </button>
                       <p className="text-xs text-muted-foreground capitalize">
                         {d.doc_type.replace("_", " ")} • {format(new Date(d.created_at), "MMM d, yyyy")}
                       </p>
@@ -142,6 +169,28 @@ export default function DocumentsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={isDocOpen} onOpenChange={setIsDocOpen}>
+        <DialogContent className="max-w-4xl w-[90vw] h-[85vh] p-6 flex flex-col items-center justify-center bg-background border-border shadow-2xl rounded-xl z-50 overflow-hidden">
+          {selectedDocUrl && selectedDocType === "pdf" ? (
+            <iframe 
+              src={selectedDocUrl} 
+              className="w-full h-full border border-border/50 rounded-lg bg-white" 
+              title="Document Preview"
+            />
+          ) : (
+            selectedDocUrl && (
+              <div className="w-full h-full flex items-center justify-center overflow-hidden rounded-lg">
+                <img 
+                  src={selectedDocUrl} 
+                  alt="Document Preview" 
+                  className="max-w-full max-h-full object-contain rounded-lg"
+                />
+              </div>
+            )
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

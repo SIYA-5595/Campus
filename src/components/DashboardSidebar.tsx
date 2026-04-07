@@ -49,6 +49,8 @@ const staffItems = [
   { title: "Attendance Control", url: "/dashboard/attendance-control", icon: Clock },
   { title: "Documents Review", url: "/dashboard/documents-review", icon: FileText },
   { title: "Events", url: "/dashboard/events", icon: Calendar },
+  { title: "Blogs", url: "/dashboard/blogs", icon: BookOpen },
+  { title: "Holidays", url: "/dashboard/holidays", icon: SunIcon },
   { title: "Leave Management", url: "/dashboard/leave-management", icon: UserCheck },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];

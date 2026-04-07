@@ -7,6 +7,7 @@ import AttendancePage from "@/pages/dashboard/AttendancePage";
 import DocumentsPage from "@/pages/dashboard/DocumentsPage";
 import EventsPage from "@/pages/dashboard/EventsPage";
 import BlogsPage from "@/pages/dashboard/BlogsPage";
+import BlogDetailsPage from "@/pages/dashboard/BlogDetailsPage";
 import HolidaysPage from "@/pages/dashboard/HolidaysPage";
 import AttendanceControlPage from "@/pages/dashboard/AttendanceControlPage";
 import DocumentsReviewPage from "@/pages/dashboard/DocumentsReviewPage";
@@ -91,6 +92,7 @@ export default function Dashboard() {
         <Route path="documents" element={<DocumentsPage />} />
         <Route path="events" element={<EventsPage />} />
         <Route path="blogs" element={<BlogsPage />} />
+        <Route path="blogs/:id" element={<BlogDetailsPage />} />
         <Route path="holidays" element={<HolidaysPage />} />
         <Route path="leave-request" element={<LeaveRequestPage />} />
         {/* Staff/Admin routes - protected */}

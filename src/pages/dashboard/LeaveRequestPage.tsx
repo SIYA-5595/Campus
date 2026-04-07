@@ -33,7 +33,7 @@ export default function LeaveRequestPage() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
-  
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [leaveType, setLeaveType] = useState("");
   const [fromDate, setFromDate] = useState<Date>();
@@ -41,9 +41,7 @@ export default function LeaveRequestPage() {
   const [purpose, setPurpose] = useState("");
 
   useEffect(() => {
-    if (user) {
-      fetchLeaves();
-    }
+    if (user) fetchLeaves();
   }, [user]);
 
   const fetchLeaves = async () => {
@@ -88,7 +86,7 @@ export default function LeaveRequestPage() {
       to_date: format(toDate, "yyyy-MM-dd"),
       total_days: days,
       purpose: purpose,
-      status: "Pending"
+      status: "Pending",
     });
 
     if (error) {
@@ -105,21 +103,28 @@ export default function LeaveRequestPage() {
     setLoading(false);
   };
 
-  const totalLeaveDays = leaves
-    .filter(l => l.status === "Approved")
+  const totalApprovedDays = leaves
+    .filter((l) => l.status === "Approved")
     .reduce((acc, curr) => acc + curr.total_days, 0);
+
+  const statusCounts = {
+    Pending: leaves.filter((l) => l.status === "Pending").length,
+    Approved: leaves.filter((l) => l.status === "Approved").length,
+    Rejected: leaves.filter((l) => l.status === "Rejected").length,
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-display font-bold">Leave Request</h2>
           <p className="text-sm text-muted-foreground">Request leave and track your leave history</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Button 
+          <Button
             onClick={() => setIsFormOpen(true)}
-            className="gradient-primary text-white hvr-shine font-medium shadow-lg px-6"
+            className="gradient-primary text-white font-medium shadow-lg px-6"
           >
             <Plus className="mr-2 h-4 w-4" />
             Apply for Leave
@@ -130,24 +135,29 @@ export default function LeaveRequestPage() {
                 <ClipboardList className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-none mb-1">Total Days Taken</p>
-                <p className="text-lg font-display font-bold text-primary leading-none">{totalLeaveDays} Days</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-none mb-1">
+                  Approved Days
+                </p>
+                <p className="text-lg font-display font-bold text-primary leading-none">
+                  {totalApprovedDays} Days
+                </p>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
 
+      {/* Leave History */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="font-display font-semibold text-lg flex items-center gap-2">
             <Clock className="h-5 w-5 text-muted-foreground" />
-            Recent History
+            Leave History
           </h3>
           <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setIsFormOpen(true)}
               className="h-8 text-xs font-semibold hover:bg-primary hover:text-white transition-all border-primary/20"
             >
@@ -155,7 +165,7 @@ export default function LeaveRequestPage() {
               New Request
             </Button>
             <Badge variant="outline" className="bg-muted text-muted-foreground h-8 px-3">
-              {leaves.length} Total Requests
+              {leaves.length} Total
             </Badge>
           </div>
         </div>
@@ -171,8 +181,10 @@ export default function LeaveRequestPage() {
                 <ClipboardList className="h-8 w-8 text-muted-foreground opacity-30" />
               </div>
               <p className="text-sm font-medium text-muted-foreground">No leave history found</p>
-              <p className="text-xs text-muted-foreground opacity-70 mb-4">Your submitted leave requests will appear here</p>
-              <Button 
+              <p className="text-xs text-muted-foreground opacity-70 mb-4">
+                Your submitted leave requests will appear here
+              </p>
+              <Button
                 onClick={() => setIsFormOpen(true)}
                 variant="outline"
                 className="border-primary/30 text-primary hover:bg-primary hover:text-white"
@@ -183,62 +195,146 @@ export default function LeaveRequestPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-3">
-            {leaves.map((l) => (
-              <Card key={l.id} className="glass-card hover:bg-muted/30 transition-all group border-border/40">
-                <CardContent className="p-4 sm:p-5">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-start gap-4">
-                      <div className={cn(
-                        "p-2.5 rounded-xl border shrink-0",
-                        l.status === "Approved" ? "bg-success/10 border-success/20 text-success" :
-                        l.status === "Rejected" ? "bg-destructive/10 border-destructive/20 text-destructive" :
-                        "bg-warning/10 border-warning/20 text-warning"
-                      )}>
-                        {l.status === "Approved" ? <CheckCircle2 className="h-5 w-5" /> :
-                         l.status === "Rejected" ? <XCircle className="h-5 w-5" /> :
-                         <AlertCircle className="h-5 w-5" />}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <h4 className="font-bold text-sm">{l.leave_type}</h4>
-                          <Badge variant="outline" className={cn(
-                            "text-[10px] px-1.5 h-4.5 font-bold uppercase tracking-wider",
-                            l.status === "Approved" ? "bg-success/20 text-success border-success/30" :
-                            l.status === "Rejected" ? "bg-destructive/20 text-destructive border-destructive/30" :
-                            "bg-warning/20 text-warning border-warning/30"
-                          )}>
-                            {l.status}
-                          </Badge>
-                          <span className="text-[11px] text-muted-foreground font-medium">({l.total_days} {l.total_days === 1 ? 'Day' : 'Days'})</span>
-                        </div>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium">
-                          <div className="flex items-center gap-1">
-                            <CalendarIcon className="h-3 w-3" />
-                            {format(new Date(l.from_date), "MMM d, yyyy")} - {format(new Date(l.to_date), "MMM d, yyyy")}
+          <Card className="glass-card border-border/40 overflow-hidden">
+            {/* Status summary bar */}
+            <div className="flex items-stretch border-b border-border/40">
+              {(
+                [
+                  {
+                    label: "Pending",
+                    count: statusCounts.Pending,
+                    badgeCls: "text-warning bg-warning/10 border-warning/20",
+                  },
+                  {
+                    label: "Approved",
+                    count: statusCounts.Approved,
+                    badgeCls: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+                  },
+                  {
+                    label: "Rejected",
+                    count: statusCounts.Rejected,
+                    badgeCls: "text-destructive bg-destructive/10 border-destructive/20",
+                  },
+                ] as const
+              ).map((s, i) => (
+                <div
+                  key={s.label}
+                  className={`flex-1 flex items-center gap-2.5 px-5 py-3.5 ${i < 2 ? "border-r border-border/40" : ""}`}
+                >
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${s.badgeCls}`}
+                  >
+                    {s.label}
+                  </span>
+                  <span className="text-base font-bold tabular-nums">{s.count}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/40 bg-muted/30">
+                    {["#", "Leave Type", "From Date", "To Date", "Days", "Purpose / Note", "Status"].map(
+                      (col) => (
+                        <th
+                          key={col}
+                          className="text-left text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-4 py-3 whitespace-nowrap"
+                        >
+                          {col}
+                        </th>
+                      )
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaves.map((l, idx) => (
+                    <tr
+                      key={l.id}
+                      className="border-b border-border/20 last:border-0 hover:bg-muted/20 transition-colors"
+                    >
+                      {/* # */}
+                      <td className="px-4 py-3.5 text-muted-foreground font-mono text-xs w-10">
+                        {idx + 1}
+                      </td>
+
+                      {/* Leave Type */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <span className="font-bold text-xs uppercase tracking-wide">{l.leave_type}</span>
+                      </td>
+
+                      {/* From Date */}
+                      <td className="px-4 py-3.5 text-xs font-medium tabular-nums whitespace-nowrap">
+                        {format(new Date(l.from_date), "dd/MM/yyyy")}
+                      </td>
+
+                      {/* To Date */}
+                      <td className="px-4 py-3.5 text-xs font-medium tabular-nums whitespace-nowrap">
+                        {format(new Date(l.to_date), "dd/MM/yyyy")}
+                      </td>
+
+                      {/* Days */}
+                      <td className="px-4 py-3.5">
+                        <span className="font-bold text-xs">{l.total_days}</span>
+                      </td>
+
+                      {/* Purpose / Note */}
+                      <td className="px-4 py-3.5 max-w-[240px]">
+                        <div className="flex flex-col gap-1.5">
+                          <div className="flex items-start gap-1.5">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground border border-border/60 rounded px-1 py-0.5 shrink-0 mt-0.5">
+                              Purpose
+                            </span>
+                            <span className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                              {l.purpose}
+                            </span>
                           </div>
-                          <div className="text-xs opacity-60">Submitted on {format(new Date(l.created_at), "MMM d")}</div>
+                          {l.admin_note && (
+                            <div className="flex items-start gap-1.5">
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-destructive border border-destructive/30 rounded px-1 py-0.5 shrink-0 mt-0.5">
+                                Note
+                              </span>
+                              <span className="text-xs text-destructive font-medium leading-relaxed">
+                                {l.admin_note}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                        <p className="mt-2 text-xs text-muted-foreground line-clamp-1 italic">"{l.purpose}"</p>
-                        
-                        {l.admin_note && (
-                          <div className="mt-3 p-2 rounded-lg bg-orange-500/5 border border-orange-500/10 text-orange-600 dark:text-orange-400">
-                            <p className="text-[11px] font-bold uppercase tracking-tight flex items-center gap-1.5 mb-1">
-                              <AlertCircle className="h-3 w-3" /> Admin Note
-                            </p>
-                            <p className="text-xs leading-relaxed">{l.admin_note}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border whitespace-nowrap",
+                            l.status === "Approved"
+                              ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
+                              : l.status === "Rejected"
+                              ? "bg-destructive/15 text-destructive border-destructive/30"
+                              : "bg-warning/15 text-warning border-warning/30"
+                          )}
+                        >
+                          {l.status === "Approved" ? (
+                            <CheckCircle2 className="h-3 w-3" />
+                          ) : l.status === "Rejected" ? (
+                            <XCircle className="h-3 w-3" />
+                          ) : (
+                            <AlertCircle className="h-3 w-3" />
+                          )}
+                          {l.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
         )}
       </div>
 
+      {/* New Leave Request Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none shadow-2xl">
           <div className="h-2 w-full bg-gradient-to-r from-primary to-accent" />
@@ -256,17 +352,31 @@ export default function LeaveRequestPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Name</Label>
-                  <Input value={profile?.full_name || ""} readOnly className="bg-muted/50 h-9 text-xs font-medium" />
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                    Name
+                  </Label>
+                  <Input
+                    value={profile?.full_name || ""}
+                    readOnly
+                    className="bg-muted/50 h-9 text-xs font-medium"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Reg No</Label>
-                  <Input value={profile?.register_number || ""} readOnly className="bg-muted/50 h-9 text-xs font-medium" />
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                    Reg No
+                  </Label>
+                  <Input
+                    value={(profile as any)?.register_number || ""}
+                    readOnly
+                    className="bg-muted/50 h-9 text-xs font-medium"
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="leaveType" className="text-xs font-semibold">Leave Type</Label>
+                <Label htmlFor="leaveType" className="text-xs font-semibold">
+                  Leave Type
+                </Label>
                 <Select value={leaveType} onValueChange={setLeaveType}>
                   <SelectTrigger className="h-10">
                     <SelectValue placeholder="Select leave type" />
@@ -284,7 +394,13 @@ export default function LeaveRequestPage() {
                   <Label className="text-xs font-semibold">From Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10", !fromDate && "text-muted-foreground")}>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal h-10",
+                          !fromDate && "text-muted-foreground"
+                        )}
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {fromDate ? format(fromDate, "PP") : "Pick date"}
                       </Button>
@@ -298,7 +414,13 @@ export default function LeaveRequestPage() {
                   <Label className="text-xs font-semibold">To Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10", !toDate && "text-muted-foreground")}>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal h-10",
+                          !toDate && "text-muted-foreground"
+                        )}
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {toDate ? format(toDate, "PP") : "Pick date"}
                       </Button>
@@ -311,18 +433,24 @@ export default function LeaveRequestPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="purpose" className="text-xs font-semibold">Purpose</Label>
-                <Textarea 
-                  id="purpose" 
-                  value={purpose} 
-                  onChange={(e) => setPurpose(e.target.value)} 
+                <Label htmlFor="purpose" className="text-xs font-semibold">
+                  Purpose
+                </Label>
+                <Textarea
+                  id="purpose"
+                  value={purpose}
+                  onChange={(e) => setPurpose(e.target.value)}
                   placeholder="Briefly explain why you need leave"
                   className="min-h-[100px] resize-none text-sm"
                 />
               </div>
 
               <div className="pt-2">
-                <Button type="submit" className="w-full h-11 hvr-shine font-bold gradient-primary text-white shadow-lg" disabled={loading}>
+                <Button
+                  type="submit"
+                  className="w-full h-11 font-bold gradient-primary text-white shadow-lg"
+                  disabled={loading}
+                >
                   {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : "Submit Application"}
                 </Button>
               </div>
