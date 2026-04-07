@@ -13,6 +13,8 @@ import DocumentsReviewPage from "@/pages/dashboard/DocumentsReviewPage";
 import StudentsPage from "@/pages/dashboard/StudentsPage";
 import ApprovalsPage from "@/pages/dashboard/ApprovalsPage";
 import AdminInvitePage from "@/pages/dashboard/AdminInvitePage";
+import LeaveRequestPage from "@/pages/dashboard/LeaveRequestPage";
+import LeaveManagementPage from "@/pages/dashboard/LeaveManagementPage";
 import { ReactNode } from "react";
 
 function StaffOnly({ children }: { children: ReactNode }) {
@@ -90,12 +92,14 @@ export default function Dashboard() {
         <Route path="events" element={<EventsPage />} />
         <Route path="blogs" element={<BlogsPage />} />
         <Route path="holidays" element={<HolidaysPage />} />
+        <Route path="leave-request" element={<LeaveRequestPage />} />
         {/* Staff/Admin routes - protected */}
         <Route path="attendance-control" element={<StaffOnly><AttendanceControlPage /></StaffOnly>} />
         <Route path="documents-review" element={<StaffOnly><DocumentsReviewPage /></StaffOnly>} />
         <Route path="students" element={<StaffOnly><StudentsPage /></StaffOnly>} />
         <Route path="approvals" element={<StaffOnly><ApprovalsPage /></StaffOnly>} />
         <Route path="admin-management" element={<StaffOnly><AdminInvitePage /></StaffOnly>} />
+        <Route path="leave-management" element={<StaffOnly><LeaveManagementPage /></StaffOnly>} />
       </Routes>
     </DashboardLayout>
   );

@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -25,6 +25,9 @@ import {
   Settings,
   GraduationCap,
   ShieldCheck,
+  ClipboardList,
+  UserCheck,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -36,6 +39,7 @@ const studentItems = [
   { title: "Events", url: "/dashboard/events", icon: Calendar },
   { title: "Blogs", url: "/dashboard/blogs", icon: BookOpen },
   { title: "Holidays", url: "/dashboard/holidays", icon: SunIcon },
+  { title: "Leave Request", url: "/dashboard/leave-request", icon: ClipboardList },
 ];
 
 const staffItems = [
@@ -45,6 +49,7 @@ const staffItems = [
   { title: "Attendance Control", url: "/dashboard/attendance-control", icon: Clock },
   { title: "Documents Review", url: "/dashboard/documents-review", icon: FileText },
   { title: "Events", url: "/dashboard/events", icon: Calendar },
+  { title: "Leave Management", url: "/dashboard/leave-management", icon: UserCheck },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
@@ -52,6 +57,7 @@ export function DashboardSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { user, role, profile, signOut } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const isPrimaryAdmin = user?.email === "admin@demo.com";
@@ -97,14 +103,28 @@ export function DashboardSidebar() {
       <SidebarFooter>
         <div className="p-3 space-y-2">
           {!collapsed && profile && (
-            <div className="px-2 py-1">
-              <p className="text-sm font-medium truncate">{profile.full_name || profile.email}</p>
-              <p className="text-xs text-muted-foreground capitalize">{role}</p>
+            <div className="px-2 py-1.5 rounded-lg bg-sidebar-accent/30 border border-sidebar-border/50">
+              <p className="text-sm font-semibold truncate">{profile.full_name || profile.email}</p>
+              <p className="text-xs text-muted-foreground capitalize mb-1.5">{role}</p>
+              {role === "student" && (
+                <button
+                  onClick={() => navigate("/onboarding")}
+                  className="flex items-center gap-1.5 text-[11px] text-primary font-semibold hover:underline transition-all"
+                >
+                  <Pencil className="h-3 w-3" />
+                  Edit Profile
+                </button>
+              )}
             </div>
           )}
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={signOut} className="rounded-full">
+            {collapsed && role === "student" && (
+              <Button variant="ghost" size="icon" onClick={() => navigate("/onboarding")} className="rounded-full" title="Edit Profile">
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" onClick={signOut} className="rounded-full" title="Sign out">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>

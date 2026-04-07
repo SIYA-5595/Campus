@@ -226,6 +226,16 @@ export type Database = {
           updated_at: string
           user_id: string
           year: string | null
+          dob: string | null
+          age: number | null
+          gender: string | null
+          contact_number: string | null
+          whatsapp_number: string | null
+          father_name: string | null
+          register_number: string | null
+          joining_year: number | null
+          end_year: number | null
+          onboarding_completed: boolean | null
         }
         Insert: {
           avatar_url?: string | null
@@ -238,6 +248,16 @@ export type Database = {
           updated_at?: string
           user_id: string
           year?: string | null
+          dob?: string | null
+          age?: number | null
+          gender?: string | null
+          contact_number?: string | null
+          whatsapp_number?: string | null
+          father_name?: string | null
+          register_number?: string | null
+          joining_year?: number | null
+          end_year?: number | null
+          onboarding_completed?: boolean | null
         }
         Update: {
           avatar_url?: string | null
@@ -250,6 +270,16 @@ export type Database = {
           updated_at?: string
           user_id?: string
           year?: string | null
+          dob?: string | null
+          age?: number | null
+          gender?: string | null
+          contact_number?: string | null
+          whatsapp_number?: string | null
+          father_name?: string | null
+          register_number?: string | null
+          joining_year?: number | null
+          end_year?: number | null
+          onboarding_completed?: boolean | null
         }
         Relationships: []
       }
