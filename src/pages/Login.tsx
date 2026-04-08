@@ -106,7 +106,7 @@ export default function Login() {
             <CardDescription>Sign in to your college account</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue={mode} onValueChange={(v) => setMode(v as any)} className="w-full mb-6">
+            <Tabs defaultValue={mode} onValueChange={(v) => setMode(v as "student" | "admin")} className="w-full mb-6">
               <TabsList className="grid w-full grid-cols-2 bg-muted/30">
                 <TabsTrigger value="student" className="flex items-center gap-2">
                   <User className="h-4 w-4" /> Student

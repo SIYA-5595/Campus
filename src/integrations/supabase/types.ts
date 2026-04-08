@@ -301,6 +301,81 @@ export type Database = {
         }
         Relationships: []
       }
+      timetables: {
+        Row: {
+          id: string
+          academic_year: string
+          department: string
+          year: string
+          semester: string
+          day: string
+          period: number
+          time_slot: string
+          subject_name: string
+          staff_name: string
+          classroom: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          academic_year: string
+          department: string
+          year: string
+          semester: string
+          day: string
+          period: number
+          time_slot: string
+          subject_name: string
+          staff_name: string
+          classroom?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          academic_year?: string
+          department?: string
+          year?: string
+          semester?: string
+          day?: string
+          period?: number
+          time_slot?: string
+          subject_name?: string
+          staff_name?: string
+          classroom?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      admin_invitations: {
+        Row: {
+          id: string
+          email: string
+          token: string
+          expires_at: string
+          used_at: string | null
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          email: string
+          token: string
+          expires_at: string
+          used_at?: string | null
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          email?: string
+          token?: string
+          expires_at?: string
+          used_at?: string | null
+          created_at?: string
+          created_by?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

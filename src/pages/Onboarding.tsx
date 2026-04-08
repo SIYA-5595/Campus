@@ -54,7 +54,7 @@ export default function Onboarding() {
         age: age.toString() 
       }));
     }
-  }, [date]);
+  }, [date, dobInput]);
 
   // Handle manual input with auto-formatting
   const handleDobManualInput = (value: string) => {

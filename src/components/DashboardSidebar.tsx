@@ -39,6 +39,7 @@ const studentItems = [
   { title: "Events", url: "/dashboard/events", icon: Calendar },
   { title: "Blogs", url: "/dashboard/blogs", icon: BookOpen },
   { title: "Holidays", url: "/dashboard/holidays", icon: SunIcon },
+  { title: "Time Table", url: "/dashboard/timetable", icon: ClipboardList },
   { title: "Leave Request", url: "/dashboard/leave-request", icon: ClipboardList },
 ];
 
@@ -51,6 +52,7 @@ const staffItems = [
   { title: "Events", url: "/dashboard/events", icon: Calendar },
   { title: "Blogs", url: "/dashboard/blogs", icon: BookOpen },
   { title: "Holidays", url: "/dashboard/holidays", icon: SunIcon },
+  { title: "Time Table", url: "/dashboard/timetable", icon: ClipboardList },
   { title: "Leave Management", url: "/dashboard/leave-management", icon: UserCheck },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];

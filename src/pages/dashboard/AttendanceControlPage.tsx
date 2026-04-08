@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,7 @@ export default function AttendanceControlPage() {
   useEffect(() => {
     if (useRange) {
       const dates = [];
-      let curr = new Date(formDate);
+      const curr = new Date(formDate);
       const end = new Date(formEndDate);
       while (curr <= end) {
         dates.push({
@@ -88,13 +88,13 @@ export default function AttendanceControlPage() {
       }
       setRangeConfigs(dates);
     }
-  }, [formDate, formEndDate, useRange]);
+  }, [formDate, formEndDate, useRange, formStartTime, formEndTime]);
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fetchReportData = async () => {
+  const fetchReportData = useCallback(async () => {
     const startDate = new Date(parseInt(reportYear), parseInt(reportMonth) - 1, 1);
     const endDate = new Date(parseInt(reportYear), parseInt(reportMonth), 0);
     
@@ -107,15 +107,15 @@ export default function AttendanceControlPage() {
     
     setReportRecords((data || []) as AttendanceRecord[]);
     setLoading(false);
-  };
+  }, [reportMonth, reportYear]);
 
   useEffect(() => {
     if (mainView === "reports") {
       fetchReportData();
     }
-  }, [mainView, reportMonth, reportYear]);
+  }, [mainView, fetchReportData]);
 
-  const fetchStudentFullHistory = async (userId: string) => {
+  const fetchStudentFullHistory = useCallback(async (userId: string) => {
     setHistoryLoading(true);
     const startDate = `${reportYear}-01-01`;
     const endDate = `${reportYear}-12-31`;
@@ -128,7 +128,7 @@ export default function AttendanceControlPage() {
       .order("date", { ascending: true });
     setStudentFullHistory((data || []) as AttendanceRecord[]);
     setHistoryLoading(false);
-  };
+  }, [reportYear]);
 
   useEffect(() => {
     if (selectedStudentDetail) {
@@ -136,9 +136,9 @@ export default function AttendanceControlPage() {
     } else {
       setStudentFullHistory([]);
     }
-  }, [selectedStudentDetail, reportYear]);
+  }, [selectedStudentDetail, fetchStudentFullHistory]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     const { data: controlData } = await supabase
       .from("attendance_control")
@@ -170,7 +170,7 @@ export default function AttendanceControlPage() {
     });
     setProfiles(map);
     setLoading(false);
-  };
+  }, []);
 
   const handleSaveControl = async () => {
     if (!user) return;
@@ -229,8 +229,8 @@ export default function AttendanceControlPage() {
       setDialogOpen(false);
       resetForm();
       fetchData();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error((error as Error).message);
     } finally {
       setSaving(false);
     }
@@ -288,8 +288,8 @@ export default function AttendanceControlPage() {
 
       toast.success("Control and associated records deleted");
       fetchData();
-    } catch (error: any) {
-      toast.error("Deletion failed: " + error.message);
+    } catch (error: unknown) {
+      toast.error("Deletion failed: " + (error as Error).message);
     } finally {
       setLoading(false);
     }
