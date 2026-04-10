@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -25,19 +25,19 @@ export default function AdminInvitePage() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchInvitations();
-  }, []);
-
-  const fetchInvitations = async () => {
-    const { data, error } = await (supabase as any)
+  const fetchInvitations = useCallback(async () => {
+    const { data, error } = await supabase
       .from("admin_invitations")
       .select("*")
       .order("created_at", { ascending: false });
     
     if (error) toast.error(error.message);
     else setInvitations((data || []) as unknown as Invitation[]);
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchInvitations();
+  }, [fetchInvitations]);
 
   const generateInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,12 +47,11 @@ export default function AdminInvitePage() {
     const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const tempPassword = "ChangeMe-" + Math.random().toString(36).substring(2, 6).toUpperCase();
 
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("admin_invitations")
       .insert({
         email,
         token,
-        temp_password: tempPassword,
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       });
 
@@ -73,7 +72,7 @@ export default function AdminInvitePage() {
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await (supabase as any).from("admin_invitations").delete().eq("id", id);
+    const { error } = await supabase.from("admin_invitations").delete().eq("id", id);
     if (error) toast.error(error.message);
     else {
       toast.success("Invitation removed");

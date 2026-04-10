@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,22 @@ import { UserCheck, CheckCircle, XCircle, Info } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+
+interface Profile {
+  id: string;
+  user_id: string;
+  full_name: string;
+  email: string;
+  department: string | null;
+  joining_year: number | null;
+  is_approved: boolean;
+  age: number | null;
+  dob: string | null;
+  contact_number: string | null;
+  whatsapp_number: string | null;
+  father_name: string | null;
+  gender: string | null;
+}
 
 interface Student {
   id: string;
@@ -32,15 +48,10 @@ export default function ApprovalsPage() {
   const [loading, setLoading] = useState(true);
   const [viewStudent, setViewStudent] = useState<Student | null>(null);
 
-  useEffect(() => {
-    fetchPendingStudents();
-  }, []);
-
-  const fetchPendingStudents = async () => {
+  const fetchPendingStudents = useCallback(async () => {
     setLoading(true);
-    // Fetch all profiles that are not yet approved, excluding the admin account
-    const { data: profileData, error } = await (supabase
-      .from("profiles") as any)
+    const { data: profileData, error } = await supabase
+      .from("profiles")
       .select("*")
       .eq("is_approved", false)
       .neq("email", "admin@demo.com")
@@ -49,7 +60,7 @@ export default function ApprovalsPage() {
     if (error) {
       toast.error(error.message);
     } else {
-      const processedStudents = (profileData || []).map((s: any) => {
+      const processedStudents = (profileData || []).map((s: Profile) => {
         let yearOfStudy = "Alumni";
         if (s.joining_year) {
           const currentYear = new Date().getFullYear();
@@ -66,7 +77,11 @@ export default function ApprovalsPage() {
       setStudents(processedStudents as unknown as Student[]);
     }
     setLoading(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchPendingStudents();
+  }, [fetchPendingStudents]);
 
   const handleApprove = async (userId: string) => {
     const { error } = await supabase

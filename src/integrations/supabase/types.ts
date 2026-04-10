@@ -226,6 +226,16 @@ export type Database = {
           updated_at: string
           user_id: string
           year: string | null
+          dob: string | null
+          age: number | null
+          gender: string | null
+          contact_number: string | null
+          whatsapp_number: string | null
+          father_name: string | null
+          register_number: string | null
+          joining_year: number | null
+          end_year: number | null
+          onboarding_completed: boolean | null
         }
         Insert: {
           avatar_url?: string | null
@@ -238,6 +248,16 @@ export type Database = {
           updated_at?: string
           user_id: string
           year?: string | null
+          dob?: string | null
+          age?: number | null
+          gender?: string | null
+          contact_number?: string | null
+          whatsapp_number?: string | null
+          father_name?: string | null
+          register_number?: string | null
+          joining_year?: number | null
+          end_year?: number | null
+          onboarding_completed?: boolean | null
         }
         Update: {
           avatar_url?: string | null
@@ -250,6 +270,16 @@ export type Database = {
           updated_at?: string
           user_id?: string
           year?: string | null
+          dob?: string | null
+          age?: number | null
+          gender?: string | null
+          contact_number?: string | null
+          whatsapp_number?: string | null
+          father_name?: string | null
+          register_number?: string | null
+          joining_year?: number | null
+          end_year?: number | null
+          onboarding_completed?: boolean | null
         }
         Relationships: []
       }
@@ -268,6 +298,81 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      timetables: {
+        Row: {
+          id: string
+          academic_year: string
+          department: string
+          year: string
+          semester: string
+          day: string
+          period: number
+          time_slot: string
+          subject_name: string
+          staff_name: string
+          classroom: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          academic_year: string
+          department: string
+          year: string
+          semester: string
+          day: string
+          period: number
+          time_slot: string
+          subject_name: string
+          staff_name: string
+          classroom?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          academic_year?: string
+          department?: string
+          year?: string
+          semester?: string
+          day?: string
+          period?: number
+          time_slot?: string
+          subject_name?: string
+          staff_name?: string
+          classroom?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      admin_invitations: {
+        Row: {
+          id: string
+          email: string
+          token: string
+          expires_at: string
+          used_at: string | null
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          email: string
+          token: string
+          expires_at: string
+          used_at?: string | null
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          email?: string
+          token?: string
+          expires_at?: string
+          used_at?: string | null
+          created_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }

@@ -26,6 +26,7 @@ interface AuthContextType {
     joining_year?: number;
     end_year?: number;
     year_of_study?: string;
+    register_number?: string;
   } | null;
   loading: boolean;
   signOut: () => Promise<void>;
@@ -79,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (profileRes.data) {
               const profileData = profileRes.data as AuthContextType["profile"];
               if (profileData) {
-                profileData.onboarding_completed = !!profileData.department || !!profileData.is_approved;
+                profileData.onboarding_completed = !!profileData.department && !!profileData.register_number && !!profileData.full_name;
                 if (profileData.joining_year) {
                   const diff = new Date().getFullYear() - profileData.joining_year;
                   if (diff === 0) profileData.year_of_study = "1st Year";
@@ -119,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data) {
       const profileData = data as AuthContextType["profile"];
       if (profileData) {
-        profileData.onboarding_completed = !!profileData.department || !!profileData.is_approved;
+        profileData.onboarding_completed = !!profileData.department && !!profileData.register_number;
         if (profileData.joining_year) {
           const diff = new Date().getFullYear() - profileData.joining_year;
           if (diff === 0) profileData.year_of_study = "1st Year";

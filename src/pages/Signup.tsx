@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export default function Signup() {
         if (inviteToken && invitedEmail === session.user.email) {
           await Promise.all([
             supabase.from("user_roles").insert({ user_id: session.user.id, role: "admin" }),
-            (supabase as any).from("admin_invitations").update({ used_at: new Date().toISOString() }).eq("token", inviteToken)
+            supabase.from("admin_invitations").update({ used_at: new Date().toISOString() }).eq("token", inviteToken)
           ]);
           toast.success("Admin account verified!");
         } else {
@@ -46,18 +46,9 @@ export default function Signup() {
     handleVerifiedSession();
   }, [session, step, navigate, inviteToken, invitedEmail]);
 
-  useEffect(() => {
-    if (inviteToken) validateInvite();
-    const verifyMode = searchParams.get("verify") === "true";
-    const emailParam = searchParams.get("email");
-    if (verifyMode && emailParam) {
-      setEmail(emailParam);
-      setStep("verify");
-    }
-  }, [inviteToken, searchParams]);
-
-  const validateInvite = async () => {
-    const { data, error } = await (supabase as any)
+  const validateInvite = useCallback(async () => {
+    if (!inviteToken) return;
+    const { data, error } = await supabase
       .from("admin_invitations")
       .select("email, used_at, expires_at")
       .eq("token", inviteToken)
@@ -66,7 +57,17 @@ export default function Signup() {
     else if (data.used_at) toast.error("This invitation has already been used.");
     else if (new Date(data.expires_at) < new Date()) toast.error("This invitation has expired.");
     else { setInvitedEmail(data.email); setEmail(data.email); toast.info("Registering as Administrative Staff"); }
-  };
+  }, [inviteToken]);
+
+  useEffect(() => {
+    if (inviteToken) validateInvite();
+    const verifyMode = searchParams.get("verify") === "true";
+    const emailParam = searchParams.get("email");
+    if (verifyMode && emailParam) {
+      setEmail(emailParam);
+      setStep("verify");
+    }
+  }, [inviteToken, searchParams, validateInvite]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,7 +127,7 @@ export default function Signup() {
     if (inviteToken && invitedEmail === email && data.user) {
       await Promise.all([
         supabase.from("user_roles").insert({ user_id: data.user.id, role: "admin" }),
-        (supabase as any).from("admin_invitations").update({ used_at: new Date().toISOString() }).eq("token", inviteToken)
+        supabase.from("admin_invitations").update({ used_at: new Date().toISOString() }).eq("token", inviteToken)
       ]);
       toast.success("Admin account verified!");
     } else {

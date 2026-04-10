@@ -32,6 +32,7 @@ export default function Onboarding() {
     gender: "",
     father_name: "",
     department: "B.Sc Information Technology",
+    register_number: "",
     joining_year: "",
     end_year: "",
     year_of_study: "",
@@ -53,7 +54,7 @@ export default function Onboarding() {
         age: age.toString() 
       }));
     }
-  }, [date]);
+  }, [date, dobInput]);
 
   // Handle manual input with auto-formatting
   const handleDobManualInput = (value: string) => {
@@ -89,11 +90,30 @@ export default function Onboarding() {
 
   useEffect(() => {
     if (user || profile) {
+      // Restore DOB date picker state if profile has a saved DOB
+      if (profile?.dob) {
+        const savedDate = new Date(profile.dob);
+        if (!isNaN(savedDate.getTime())) {
+          setDate(savedDate);
+          setDobInput(format(savedDate, "dd/MM/yyyy"));
+        }
+      }
+
       setFormData((prev) => ({
         ...prev,
         full_name: profile?.full_name || user?.user_metadata?.full_name || "",
         email: profile?.email || user?.email || "",
-        department: "B.Sc Information Technology",
+        department: profile?.department || "B.Sc Information Technology",
+        gender: profile?.gender || "",
+        father_name: profile?.father_name || "",
+        register_number: profile?.register_number || "",
+        joining_year: profile?.joining_year?.toString() || "",
+        end_year: profile?.end_year?.toString() || "",
+        year_of_study: profile?.year_of_study || "",
+        age: profile?.age?.toString() || "",
+        dob: profile?.dob || "",
+        contact_number: profile?.contact_number || "+91 ",
+        whatsapp_number: profile?.whatsapp_number || "+91 ",
       }));
     }
   }, [profile, user]);
@@ -129,6 +149,7 @@ export default function Onboarding() {
     if (!user) return;
 
     setLoading(true);
+
     const { error } = await supabase
       .from("profiles")
       .upsert(
@@ -143,22 +164,31 @@ export default function Onboarding() {
           gender: formData.gender,
           father_name: formData.father_name,
           department: formData.department,
+          register_number: formData.register_number || null,
           joining_year: parseInt(formData.joining_year) || null,
           end_year: parseInt(formData.end_year) || null,
         },
         { onConflict: "user_id" }
       );
 
+    setLoading(false);
+
     if (error) {
-      setLoading(false);
-      toast.error(error.message);
-    } else {
-      // Refresh cached profile so Dashboard doesn't redirect back here
-      await refreshProfile();
-      setLoading(false);
-      toast.success("Profile complete! Now awaiting administrative approval.");
-      navigate("/dashboard");
+      // 23505 = unique_violation — register_number already taken by another user
+      if (error.code === "23505") {
+        toast.error("This registration number is already in use. Please enter your unique register number.");
+      } else {
+        toast.error(error.message);
+      }
+      return;
     }
+
+    await refreshProfile();
+    const successMsg = profile?.is_approved
+      ? "Profile updated successfully."
+      : "Profile complete! Now awaiting administrative approval.";
+    toast.success(successMsg);
+    navigate("/dashboard");
   };
 
   if (authLoading) return null;
@@ -325,6 +355,19 @@ export default function Onboarding() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="register_number" className="flex items-center gap-2">
+                    Register Number 
+                    <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase font-bold border border-primary/20">Recommended / Required</span>
+                  </Label>
+                  <Input 
+                    id="register_number" 
+                    value={formData.register_number} 
+                    onChange={(e) => setFormData({ ...formData, register_number: e.target.value })} 
+                    placeholder="e.g. 21BIT001"
+                    required 
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="joining_year">Joining Year</Label>
                   <Input 
                     id="joining_year" 
@@ -359,7 +402,7 @@ export default function Onboarding() {
 
               <Button type="submit" className="w-full gradient-primary text-primary-foreground font-medium h-11" disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                Submit & Request Approval
+                {profile?.is_approved ? "Save Changes" : "Submit & Request Approval"}
               </Button>
             </form>
           </CardContent>
